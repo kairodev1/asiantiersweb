@@ -59,7 +59,7 @@ export default async function PlayerPage({ params }: { params: Promise<{ ign: st
       </Link>
 
       {/* Header card */}
-      <div className="card relative mt-4 overflow-hidden p-5 sm:p-7">
+      <div className="card relative mt-4 overflow-hidden p-6 sm:p-8">
         <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-brand-500/10 blur-3xl" />
         <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center">
           <div className="relative shrink-0">

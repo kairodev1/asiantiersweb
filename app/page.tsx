@@ -45,13 +45,13 @@ export default async function HomePage() {
   return (
     <div className="container-x nav-offset animate-page-in">
       {/* ---------- Hero ---------- */}
-      <section className="grid items-center gap-10 lg:grid-cols-[1.15fr_1fr]">
+      <section className="grid items-center gap-8 lg:grid-cols-[1.1fr_1fr]">
         <div className="animate-fade-up">
           <span className="eyebrow">
             <Sparkles className="h-3 w-3" />
             Official AsianTiers PvP Tierlist
           </span>
-          <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-ink-100 sm:text-6xl">
+          <h1 className="mt-4 font-display text-4xl font-extrabold leading-[1.02] tracking-tight text-ink-100 sm:text-5xl">
             The home of
             <br />
             <span className="text-mint-400">AsianTiers Minecraft</span>
@@ -118,7 +118,7 @@ export default async function HomePage() {
       </section>
 
       {/* ---------- Stats ---------- */}
-      <section className="mt-14 grid grid-cols-2 gap-3 lg:grid-cols-3">
+      <section className="mt-10 grid grid-cols-2 gap-3 lg:grid-cols-3">
         <Stat label="Ranked players" value={formatNumber(ranked.length)} />
         <Stat label="Tier placements" value={formatNumber(totalTierEntries)} hint="Across 13 gamemodes" />
         <Stat
@@ -135,7 +135,7 @@ export default async function HomePage() {
       )}
 
       {/* ---------- Gamemodes ---------- */}
-      <section className="mt-16">
+      <section className="mt-12">
         <SectionHeader
           title="Gamemodes"
           subtitle="Thirteen competitive ladders, one ranking system."
@@ -227,7 +227,7 @@ export default async function HomePage() {
       </section>
 
       {/* ---------- Discord CTA ---------- */}
-      <section className="mt-16">
+      <section className="mt-12">
         <div className="rounded-3xl border border-slate-200 bg-navy-900 px-6 py-10 sm:px-10">
           <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
             <div>

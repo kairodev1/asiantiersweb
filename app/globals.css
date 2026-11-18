@@ -101,12 +101,12 @@ body {
 
 /* Offset for the fixed navbar */
 .nav-offset {
-  padding-top: 104px;
+  padding-top: 88px;
 }
 
 @media (max-width: 767px) {
   .nav-offset {
-    padding-top: 96px;
+    padding-top: 80px;
   }
 }
 

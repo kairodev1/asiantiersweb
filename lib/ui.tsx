@@ -233,11 +233,11 @@ export function Nav() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 border-b bg-navy-900/95 backdrop-blur transition-colors duration-300 ${
-        scrolled ? "border-slate-200" : "border-slate-200"
+      className={`fixed inset-x-0 top-0 z-50 border-b bg-white/90 backdrop-blur-md transition-all duration-300 ${
+        scrolled ? "border-slate-200 shadow-sm" : "border-slate-100"
       }`}
     >
-      <div className="container-x flex h-[72px] items-center gap-4">
+      <div className="container-x flex h-16 items-center gap-4">
         <Logo />
 
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex" aria-label="Main">
@@ -248,24 +248,23 @@ export function Nav() {
                 key={l.href}
                 href={l.href}
                 aria-current={active ? "page" : undefined}
-                className={`relative flex items-center gap-2 rounded-lg px-5 py-2.5 text-[15px] font-medium transition duration-200 ${
-                  active ? "text-ink-100" : "text-ink-300 hover:bg-navy-800 hover:text-ink-100"
+                className={`relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                  active ? "bg-mint-500/10 text-mint-600" : "text-ink-400 hover:bg-slate-100 hover:text-ink-100"
                 }`}
               >
-                <l.icon className={`h-[18px] w-[18px] transition ${active ? "text-mint-400" : "text-ink-400"}`} />
+                <l.icon className={`h-4 w-4 transition ${active ? "text-mint-500" : "text-ink-400"}`} />
                 {l.label}
-                {active && <span className="absolute inset-x-4 -bottom-[15px] h-0.5 rounded-full bg-mint-400" />}
               </Link>
             );
           })}
         </nav>
 
-        <div className="ml-auto hidden w-full max-w-[230px] sm:block lg:max-w-[260px]">
+        <div className="ml-auto hidden w-full max-w-sm sm:block">
           <GlobalSearch />
         </div>
 
         <button
-          className="ml-auto grid h-10 w-10 place-items-center rounded-lg border border-slate-200 text-ink-200 transition hover:border-mint-400/40 hover:text-ink-100 sm:hidden"
+          className="ml-auto grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-ink-300 transition hover:border-mint-500/40 hover:text-ink-100 sm:hidden"
           onClick={() => setOpen((v) => !v)}
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
