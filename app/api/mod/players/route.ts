@@ -32,7 +32,7 @@ export async function GET(request: Request) {
 
     return json({ schema: 1, count: players.length, players });
   } catch (error) {
-    console.error("KAIROTIERS MOD API ERROR:", error);
+    console.error("AsianTIERS MOD API ERROR:", error);
     return json({ error: "Player data is temporarily unavailable" }, 502);
   }
 }

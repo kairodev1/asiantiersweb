@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Trophy, Users, ShieldCheck, Sparkles, ExternalLink, Crown, Flame, Swords, Activity } from "lucide-react";
 import { fetchAllPlayers, fetchHallOfFame, readClient, type Player } from "@/lib/supabase";
 import { GAMEMODES, DISCORD_INVITE, tierRank } from "@/lib/tiers";
-import { bestTier, formatNumber, peakFor, tierFor, totalPoints } from "@/lib/data";
+import { bestTier, formatNumber, peakFor, tierFor, totalPoints, rankMap } from "@/lib/data";
 import { TierBadge, Head, SectionHeader, Stat, Empty, DiscordMark, ModeIcon } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +30,12 @@ export default async function HomePage() {
   }
 
   const ranked = players.filter((p) => bestTier(p));
-  const top3 = [...ranked].sort((a, b) => totalPoints(b) - totalPoints(a) || tierRank(bestTier(b)) - tierRank(bestTier(a))).slice(0, 3);
+  const topPlayers = [...ranked].sort((a, b) => totalPoints(b) - totalPoints(a) || tierRank(bestTier(b)) - tierRank(bestTier(a))).slice(0, 3);
+  const ranks = rankMap(players);
+  const previewRows = [...ranked]
+    .sort((a, b) => totalPoints(b) - totalPoints(a) || a.ign.localeCompare(b.ign))
+    .slice(0, 10)
+    .map((player) => ({ player, rank: ranks.get(player.ign.toLowerCase()) ?? 0, points: totalPoints(player) }));
 
   const totalTierEntries = players.reduce((n, p) => n + GAMEMODES.filter((g) => tierFor(p, g.id)).length, 0);
 
@@ -43,9 +48,10 @@ export default async function HomePage() {
 
   return (
     <div className="container-x nav-offset animate-page-in">
-      {}
-      <section className="grid items-center gap-8 rounded-3xl border border-slate-200 bg-navy-900/70 p-6 lg:grid-cols-[1.1fr_1fr] lg:p-10">
-        <div className="animate-fade-up">
+      <section className="relative grid items-center gap-8 overflow-hidden rounded-3xl border border-slate-200 bg-navy-900/70 p-6 lg:grid-cols-[1.15fr_1fr] lg:p-10">
+        <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-brand-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-mint-500/10 blur-3xl" />
+        <div className="relative animate-fade-up">
           <span className="eyebrow">
             <Sparkles className="h-3 w-3" />
             Official AsianTiers PvP Tierlist
@@ -81,11 +87,10 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {}
-        <div>
-          {top3.length > 0 ? (
+        <div className="relative">
+          {topPlayers.length > 0 ? (
             <div className="grid gap-3">
-              {top3.map((p, i) => (
+              {topPlayers.map((p, i) => (
                 <Link
                   key={String(p.id)}
                   href={`/player/${encodeURIComponent(p.ign)}`}
@@ -116,8 +121,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {}
-      <section className="mt-10 grid grid-cols-2 gap-3 lg:grid-cols-3">
+      <section className="mt-10 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="Ranked players" value={formatNumber(ranked.length)} />
         <Stat label="Tier placements" value={formatNumber(totalTierEntries)} hint="Across 13 gamemodes" />
         <Stat
@@ -125,6 +129,7 @@ export default async function HomePage() {
           value={stats?.test_count ? formatNumber(stats.test_count) : "—"}
           hint="Verified by AsianTiers testers"
         />
+        <Stat label="Gamemodes" value={GAMEMODES.length} hint="Competitive ladders" />
       </section>
 
       {error && (
@@ -133,7 +138,59 @@ export default async function HomePage() {
         </p>
       )}
 
-      {}
+      <section className="mt-12">
+        <SectionHeader
+          title="Leaderboard preview"
+          subtitle="Top players on AsianTiers right now."
+          action={
+            <Link href="/ranking" className="btn-ghost h-9 px-3 text-[13px]">
+              Full rankings <ArrowRight className="h-4 w-4" />
+            </Link>
+          }
+        />
+        {previewRows.length === 0 ? (
+          <Empty title="No ranked players yet">Rankings appear once testers submit results.</Empty>
+        ) : (
+          <div className="card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[480px] border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-left text-xs font-medium text-ink-400">
+                    <th className="w-14 px-4 py-3 font-medium">Rank</th>
+                    <th className="px-2 py-3 font-medium">Player</th>
+                    <th className="w-28 px-4 py-3 text-right font-medium">Points</th>
+                    <th className="w-28 px-2 py-3 text-center font-medium">Top tier</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {previewRows.map(({ player, rank, points }) => (
+                    <tr key={String(player.id)} className="group border-t border-slate-200 transition hover:bg-navy-850">
+                      <td className="px-4 py-3 align-middle">
+                        <span className={`font-mono text-sm font-bold ${rank && rank <= 3 ? "text-mint-400" : "text-ink-400"}`}>
+                          {rank ? `#${rank}` : "—"}
+                        </span>
+                      </td>
+                      <td className="px-2 py-3 align-middle">
+                        <Link href={`/player/${encodeURIComponent(player.ign)}`} className="flex items-center gap-2.5">
+                          <Head ign={player.ign} size={28} className="ring-1 ring-slate-200" />
+                          <span className="truncate text-[14px] font-semibold text-ink-100 transition group-hover:text-brand-300">{player.ign}</span>
+                        </Link>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-right align-middle">
+                        <span className="font-display text-base font-bold text-ink-100">{formatNumber(points)}</span>
+                      </td>
+                      <td className="px-2 py-3 text-center align-middle">
+                        <TierBadge tier={bestTier(player)} size="xs" />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </section>
+
       <section className="mt-12">
         <SectionHeader
           title="Gamemodes"
@@ -169,8 +226,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {}
-      <section className="mt-16 grid gap-4 lg:grid-cols-[1.1fr_1fr]">
+      <section className="mt-12 grid gap-4 lg:grid-cols-[1.1fr_1fr]">
         <div className="card p-5">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-lg font-bold text-ink-100">Gamemode leaders</h2>
@@ -182,7 +238,7 @@ export default async function HomePage() {
               <li key={g.id}>
                 <Link href={`/ranking?mode=${g.id}`} className="flex items-center gap-3 rounded-lg px-1.5 py-2 transition duration-200 hover:bg-navy-850">
                   <ModeIcon id={g.id} size={20} />
-                  <span className="w-16 shrink-0 text-xs font-semibold text-ink-300">{g.name}</span>
+                  <span className="w-24 shrink-0 text-xs font-semibold text-ink-300">{g.name}</span>
                   {leader ? (
                     <>
                       <Head ign={leader.ign} size={24} />
@@ -225,7 +281,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {}
       <section className="mt-12">
         <div className="rounded-3xl border border-slate-200 bg-navy-900 px-6 py-10 sm:px-10">
           <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">

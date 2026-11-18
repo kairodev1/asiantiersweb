@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, Trophy } from "lucide-react";
 import { GAMEMODES, tierNumber } from "@/lib/tiers";
 import { formatNumber, peakFor, pointsFor, tierFor, totalPoints, rankMap } from "@/lib/data";
 import type { Player } from "@/lib/supabase";
@@ -15,20 +15,20 @@ const BOARD = [1, 2, 3, 4, 5] as const;
 
 type Row = { player: Player; rank: number; points: number };
 
-
-function buildOverallRows(players: Player[]): Row[] {
+function buildOverallRows(players: Player[], query: string): Row[] {
   const ranks = rankMap(players);
-  const ranked = players
+  const q = query.trim().toLowerCase();
+  const filtered = q ? players.filter((p) => p.ign.toLowerCase().includes(q)) : players;
+  const ranked = filtered
     .filter((p) => ranks.has(p.ign.toLowerCase()))
     .map((player) => ({ player, points: totalPoints(player), rank: ranks.get(player.ign.toLowerCase()) ?? 0 }))
     .sort((a, b) => b.points - a.points || a.player.ign.localeCompare(b.player.ign));
-  const unranked = players
+  const unranked = filtered
     .filter((p) => !ranks.has(p.ign.toLowerCase()))
     .map((player) => ({ player, points: totalPoints(player), rank: 0 }))
     .sort((a, b) => a.player.ign.localeCompare(b.player.ign));
   return [...ranked, ...unranked];
 }
-
 
 function buildBoard(players: Player[], gamemodeId: string) {
   const ranked = players.filter((p) => tierFor(p, gamemodeId));
@@ -48,7 +48,6 @@ function buildBoard(players: Player[], gamemodeId: string) {
   }));
 }
 
-
 const DOT_COLORS = ["bg-brand-400", "bg-mint-400", "bg-brand-300", "bg-mint-300", "bg-ink-400"];
 
 export function RankingClient({ initialPlayers, error }: { initialPlayers: Player[]; error: string | null }) {
@@ -60,6 +59,7 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
   const [loading, setLoading] = useState(false);
   const [, setUpdatedAt] = useState<Date | null>(error ? null : new Date());
   const [loadError, setLoadError] = useState<string | null>(error);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -99,7 +99,7 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
     setPage(1);
   }, [mode]);
 
-  const overallRows = useMemo(() => buildOverallRows(players), [players]);
+  const overallRows = useMemo(() => buildOverallRows(players, query), [players, query]);
   const board = useMemo(() => (mode === "overall" ? [] : buildBoard(players, mode)), [players, mode]);
 
   const totalPages = Math.max(1, Math.ceil(overallRows.length / PAGE_SIZE));
@@ -107,9 +107,13 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
   const activeMode = GAMEMODES.find((g) => g.id === mode);
   const boardCount = board.reduce((n, b) => n + b.rows.length, 0);
 
+  const handleQuery = (value: string) => {
+    setQuery(value);
+    setPage(1);
+  };
+
   return (
     <div className="animate-page-in">
-      {}
       <div className="border-b border-slate-200 pb-7">
         <p className="text-[13px] font-bold uppercase tracking-wide text-mint-400">Leaderboard</p>
         <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-ink-100 sm:text-4xl">Player rankings</h1>
@@ -122,12 +126,20 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
 
       {loadError && <p className="mt-3 rounded-xl border border-brand-400/30 bg-navy-800 px-4 py-2.5 text-xs text-brand-300">{loadError}</p>}
 
-      {}
       {mode === "overall" ? (
         <section key="overall" className="mt-7 animate-fade-in">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-[17px] font-bold text-ink-100">Overall standings</h2>
-            <p className="text-xs text-ink-400">Ranked by total points</p>
+            <div className="relative w-full max-w-xs">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => handleQuery(e.target.value)}
+                placeholder="Search players"
+                className="w-full rounded-xl border border-slate-200 bg-navy-950 py-2 pl-9 pr-3 text-sm text-ink-100 placeholder:text-ink-400 outline-none focus:border-mint-400/70 focus:ring-2 focus:ring-mint-400/20"
+              />
+            </div>
           </div>
 
           {loading && overallRows.length === 0 ? (
@@ -137,55 +149,53 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
           ) : (
             <div className="card overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[1040px] border-collapse text-sm table-fixed">
+                <table className="w-full min-w-[960px] border-collapse text-sm table-fixed">
                   <thead>
-                    <tr className="text-left text-xs font-medium text-ink-400">
-                      <th className="w-20 px-4 py-3.5 font-medium">Rank</th>
-                      <th className="w-44 px-2 py-3.5 font-medium">Player</th>
-                      <th className="px-2 py-3.5 text-center font-medium">Tier matrix</th>
-                      <th className="w-28 px-4 py-3.5 text-right font-medium">Points</th>
+                    <tr className="border-b border-slate-200 text-left text-xs font-medium text-ink-400">
+                      <th className="w-12 px-3 py-3 text-center font-medium">Rank</th>
+                      <th className="w-44 px-2 py-3 font-medium">Player</th>
+                      {GAMEMODES.map((g) => (
+                        <th key={g.id} className="w-14 px-1 py-3 text-center font-medium" title={g.name}>
+                          <div className="flex justify-center">
+                            <ModeIcon id={g.id} size={18} />
+                          </div>
+                        </th>
+                      ))}
+                      <th className="w-24 px-3 py-3 text-right font-medium">Points</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {currentPage.map(({ player, rank, points }) => {
-                      return (
-                        <tr key={String(player.id)} className="group border-t border-slate-200 transition hover:bg-navy-850">
-                          <td className="px-4 py-4 align-middle">
-                            <Head ign={player.ign} size={40} className="ring-1 ring-slate-200" />
-                          </td>
-                          <td className="px-2 py-4 align-middle">
-                            <Link href={`/player/${encodeURIComponent(player.ign)}`} className="flex min-w-0 flex-col">
-                              <span className="flex items-center gap-2">
-                                <span className="font-mono text-[11px] font-bold text-brand-300">{rank ? `#${rank}` : "—"}</span>
-                                <span className="truncate text-[15px] font-semibold text-ink-100 transition group-hover:text-brand-300">{player.ign}</span>
-                              </span>
-                              <span className="mt-0.5 text-xs text-ink-500">Overall ranking</span>
-                            </Link>
-                          </td>
-                          <td className="px-2 py-4 align-middle">
-                            <div className="grid grid-cols-8 gap-1.5">
-                              {GAMEMODES.map((g) => {
-                                const t = tierFor(player, g.id);
-                                return (
-                                  <div key={g.id} className="flex flex-col items-center gap-1" title={`${g.name}${t ? `: ${t}` : ""}`}>
-                                    <ModeIcon id={g.id} size={20} className={t ? "opacity-100" : "opacity-35"} />
-                                    {t ? (
-                                      <TierBadge tier={t} peak={peakFor(player, g.id)} size="xs" />
-                                    ) : (
-                                      <span className="text-[10px] leading-5 text-ink-500">—</span>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4 text-right align-middle">
-                            <span className="font-display text-lg font-bold text-ink-100">{formatNumber(points)}</span>
-                            <span className="ml-1 text-[11px] text-ink-500">pts</span>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {currentPage.map(({ player, rank, points }) => (
+                      <tr key={String(player.id)} className="group border-t border-slate-200 transition hover:bg-navy-850">
+                        <td className="px-3 py-3 text-center align-middle">
+                          <span className={`font-mono text-sm font-bold ${rank && rank <= 3 ? "text-mint-400" : "text-ink-400"}`}>
+                            {rank ? `#${rank}` : "—"}
+                          </span>
+                        </td>
+                        <td className="px-2 py-3 align-middle">
+                          <Link href={`/player/${encodeURIComponent(player.ign)}`} className="flex items-center gap-2.5">
+                            <Head ign={player.ign} size={32} className="ring-1 ring-slate-200" />
+                            <span className="truncate text-[14px] font-semibold text-ink-100 transition group-hover:text-brand-300">{player.ign}</span>
+                          </Link>
+                        </td>
+                        {GAMEMODES.map((g) => {
+                          const t = tierFor(player, g.id);
+                          return (
+                            <td key={g.id} className="px-1 py-3 text-center align-middle">
+                              {t ? (
+                                <TierBadge tier={t} peak={peakFor(player, g.id)} size="xs" />
+                              ) : (
+                                <span className="text-[10px] text-ink-500">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                        <td className="whitespace-nowrap px-3 py-3 text-right align-middle">
+                          <span className="font-display text-base font-bold text-ink-100">{formatNumber(points)}</span>
+                          <span className="ml-1 text-[10px] text-ink-500">pts</span>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -212,7 +222,6 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
           )}
         </section>
       ) : (
-        
         <section key={mode} className="mt-7 animate-fade-in">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-[17px] font-bold text-ink-100">{activeMode?.name} tiers</h2>
@@ -256,7 +265,7 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
                                 <span className="font-mono text-[10px] leading-none text-ink-500">#{rank}</span>
                               </span>
                             </span>
-                            <span className="ml-auto shrink-0 font-mono text-[11px] font-semibold leading-none text-mint-300">{formatNumber(points)} pts</span>
+                            <span className="ml-auto shrink-0 whitespace-nowrap font-mono text-[11px] font-semibold leading-none text-mint-300">{formatNumber(points)} pts</span>
                           </Link>
                         </li>
                       ))}
@@ -267,6 +276,12 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
             </div>
           )}
         </section>
+      )}
+
+      {mode === "overall" && (
+        <p className="mt-4 flex items-center gap-2 text-[11px] text-ink-500">
+          <Trophy className="h-3.5 w-3.5" /> Click a row to open the player profile.
+        </p>
       )}
     </div>
   );

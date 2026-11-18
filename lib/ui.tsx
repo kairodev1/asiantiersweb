@@ -303,32 +303,28 @@ export function Nav() {
 export function GamemodeBar({ value, onChange }: { value: string; onChange: (id: string) => void }) {
   const tabs = [{ id: "overall", name: "Overall" }, ...GAMEMODES.map((g) => ({ id: g.id, name: g.name }))];
   return (
-    <div
-      className="flex flex-wrap justify-center gap-1 rounded-xl border border-slate-200 bg-navy-900 p-1.5"
-      role="tablist"
-      aria-label="Gamemodes"
-    >
-      {tabs.map((m) => {
-        const selected = value === m.id;
-        return (
-          <button
-            key={m.id}
-            role="tab"
-            aria-selected={selected}
-            onClick={() => onChange(m.id)}
-            className={`flex w-[calc((100%-0.75rem)/4)] min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-1.5 py-1.5 transition duration-200 sm:w-[calc((100%-1rem)/5)] md:w-[calc((100%-1.75rem)/8)] ${
-              selected ? "bg-navy-700 text-ink-100 ring-1 ring-inset ring-slate-200" : "text-ink-300 hover:bg-navy-800 hover:text-ink-100"
-            }`}
-          >
-            <ModeIcon
-              id={m.id}
-              size={18}
-              className={`transition duration-200 ${selected ? "opacity-100" : "opacity-70"}`}
-            />
-            <span className="w-full truncate text-center text-[11px] font-semibold leading-none tracking-tight">{m.name}</span>
-          </button>
-        );
-      })}
+    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-navy-900 p-1.5" role="tablist" aria-label="Gamemodes">
+      <div className="flex min-w-max gap-1">
+        {tabs.map((m) => {
+          const selected = value === m.id;
+          return (
+            <button
+              key={m.id}
+              role="tab"
+              aria-selected={selected}
+              onClick={() => onChange(m.id)}
+              className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold transition duration-200 ${
+                selected
+                  ? "bg-navy-700 text-ink-100 ring-1 ring-inset ring-slate-200"
+                  : "text-ink-300 hover:bg-navy-800 hover:text-ink-100"
+              }`}
+            >
+              <ModeIcon id={m.id} size={18} className={selected ? "opacity-100" : "opacity-70"} />
+              <span>{m.name}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -349,7 +345,7 @@ export function TierBadge({ tier, peak, size = "md" }: { tier?: string | null; p
     <span className="group/badge relative inline-flex">
       <span
         title={label}
-        className={`inline-flex items-center justify-center gap-1.5 rounded-md font-mono font-bold tabular-nums ring-1 ring-inset ${s.bg} ${s.text} ${s.ring} ${sizes}`}
+        className={`inline-flex items-center justify-center gap-1.5 rounded-md font-mono font-bold tabular-nums ring-1 ring-inset whitespace-nowrap ${s.bg} ${s.text} ${s.ring} ${sizes}`}
       >
         <span className={`${size === "xs" ? "h-1 w-1" : "h-1.5 w-1.5"} rounded-full ${s.dot}`} />
         {cleanTier(tier) ?? "No Tier"}

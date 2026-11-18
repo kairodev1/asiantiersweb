@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, BadgeCheck, CalendarDays, Crown, Trophy, Hash, Swords } from "lucide-react";
+import { ArrowLeft, BadgeCheck, CalendarDays, Crown, Trophy, Hash, Swords, Medal } from "lucide-react";
 import { fetchAllPlayers, readClient, type Player } from "@/lib/supabase";
 import { GAMEMODES, tierRank } from "@/lib/tiers";
 import { bestTier, formatDate, formatNumber, peakFor, pointsFor, rankMap, tierFor, totalPoints } from "@/lib/data";
-import { Head, TierBadge, DiscordMark } from "@/lib/ui";
+import { Head, TierBadge, ModeIcon } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +40,6 @@ export default async function PlayerPage({ params }: { params: Promise<{ ign: st
   const decoded = decodeURIComponent(ign);
   const { player, players } = await findPlayer(decoded);
   if (!player) notFound();
-
   const overallRank = rankMap(players).get(player.ign.toLowerCase()) ?? null;
   const tier = bestTier(player);
   const points = totalPoints(player);
@@ -57,12 +56,11 @@ export default async function PlayerPage({ params }: { params: Promise<{ ign: st
         <ArrowLeft className="h-3.5 w-3.5" /> Back to rankings
       </Link>
 
-      {}
       <div className="card relative mt-4 overflow-hidden p-6 sm:p-8">
         <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-brand-500/10 blur-3xl" />
         <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center">
           <div className="relative shrink-0">
-            <Head ign={player.ign} size={88} className="animate-fade-in ring-2 ring-slate-200" />
+            <Head ign={player.ign} size={96} className="animate-fade-in ring-2 ring-slate-200" />
             <span className="absolute -bottom-2 -right-2 grid h-8 w-8 place-items-center rounded-xl bg-navy-800 ring-1 ring-slate-200">
               <BadgeCheck className="h-4 w-4 text-brand-400" />
             </span>
@@ -91,7 +89,7 @@ export default async function PlayerPage({ params }: { params: Promise<{ ign: st
               </span>
               {discordMasked && (
                 <span className="inline-flex items-center gap-1.5" title="Discord account linked (partially hidden)">
-                  <DiscordMark className="h-3.5 w-3.5 text-ink-400" />
+                  <Medal className="h-3.5 w-3.5 text-ink-400" />
                   <span className="font-mono">{discordMasked}</span>
                 </span>
               )}
@@ -100,15 +98,13 @@ export default async function PlayerPage({ params }: { params: Promise<{ ign: st
         </div>
       </div>
 
-      {}
-      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <MiniStat label="Overall tier" value={tier ? <span className="font-mono text-ink-100">{tier}</span> : "—"} />
         <MiniStat label="Overall rank" value={overallRank ? `#${overallRank}` : "—"} />
         <MiniStat label="Best gamemode" value={bestMode ? bestMode.g.name : "—"} />
         <MiniStat label="Gamemodes ranked" value={`${rankedCount}/${GAMEMODES.length}`} />
       </div>
 
-      {}
       <h2 className="section-title mt-10 text-xl sm:text-2xl">Gamemode tiers</h2>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {ranked.map(({ g, tier: t, points: pts }) => {
@@ -116,7 +112,10 @@ export default async function PlayerPage({ params }: { params: Promise<{ ign: st
           return (
             <div key={g.id} className={`card relative overflow-hidden p-4 ${t ? "card-hover" : "opacity-60"}`}>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-ink-100">{g.name}</span>
+                <span className="flex items-center gap-2 text-sm font-semibold text-ink-100">
+                  <ModeIcon id={g.id} size={18} />
+                  {g.name}
+                </span>
                 <TierBadge tier={t} peak={peakFor(player, g.id)} size="sm" />
               </div>
               <div className="mt-4 flex items-end justify-between">
@@ -140,11 +139,11 @@ export default async function PlayerPage({ params }: { params: Promise<{ ign: st
         })}
       </div>
 
-      {tier === "LT5" && (
+      {tier === "HT1" || tier === "RHT1" ? (
         <div className="mt-6 flex items-center gap-3 rounded-2xl border border-mint-400/20 bg-mint-400/[0.05] px-4 py-3 text-sm text-mint-300/90">
           <Crown className="h-4 w-4 shrink-0 text-mint-300" /> Elite competitor - one of the strongest players on AsianTiers.
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
