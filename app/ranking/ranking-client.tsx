@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Search, Trophy } from "lucide-react";
 import { GAMEMODES, tierNumber } from "@/lib/tiers";
@@ -52,6 +52,7 @@ const DOT_COLORS = ["bg-brand-400", "bg-mint-400", "bg-brand-300", "bg-mint-300"
 
 export function RankingClient({ initialPlayers, error }: { initialPlayers: Player[]; error: string | null }) {
   const params = useSearchParams();
+  const router = useRouter();
   const initialMode = params.get("mode");
   const [mode, setMode] = useState<string>(initialMode && (initialMode === "overall" || GAMEMODES.some((g) => g.id === initialMode)) ? initialMode : "overall");
   const [page, setPage] = useState(1);
@@ -112,6 +113,10 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
     setPage(1);
   };
 
+  const openPlayer = (ign: string) => {
+    router.push(`/player/${encodeURIComponent(ign)}`);
+  };
+
   return (
     <div className="animate-page-in">
       <div className="border-b border-slate-200 pb-7">
@@ -149,50 +154,66 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
           ) : (
             <div className="card overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[960px] border-collapse text-sm table-fixed">
+                <table className="w-full min-w-[1180px] border-collapse text-sm table-fixed">
                   <thead>
                     <tr className="border-b border-slate-200 text-left text-xs font-medium text-ink-400">
-                      <th className="w-12 px-3 py-3 text-center font-medium">Rank</th>
-                      <th className="w-44 px-2 py-3 font-medium">Player</th>
+                      <th className="w-16 px-3 py-4 text-center font-medium">Rank</th>
+                      <th className="w-52 px-3 py-4 font-medium">Player</th>
                       {GAMEMODES.map((g) => (
-                        <th key={g.id} className="w-14 px-1 py-3 text-center font-medium" title={g.name}>
-                          <div className="flex justify-center">
-                            <ModeIcon id={g.id} size={18} />
+                        <th key={g.id} className="w-24 px-2 py-4 text-center font-medium" title={g.name}>
+                          <div className="flex flex-col items-center gap-1">
+                            <ModeIcon id={g.id} size={20} />
+                            <span className="text-[10px] text-ink-500">{g.name}</span>
                           </div>
                         </th>
                       ))}
-                      <th className="w-24 px-3 py-3 text-right font-medium">Points</th>
+                      <th className="w-28 px-4 py-4 text-right font-medium">Points</th>
                     </tr>
                   </thead>
                   <tbody>
                     {currentPage.map(({ player, rank, points }) => (
-                      <tr key={String(player.id)} className="group border-t border-slate-200 transition hover:bg-navy-850">
-                        <td className="px-3 py-3 text-center align-middle">
-                          <span className={`font-mono text-sm font-bold ${rank && rank <= 3 ? "text-mint-400" : "text-ink-400"}`}>
+                      <tr
+                        key={String(player.id)}
+                        onClick={() => openPlayer(player.ign)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            openPlayer(player.ign);
+                          }
+                        }}
+                        tabIndex={0}
+                        role="link"
+                        className="group cursor-pointer border-t border-slate-200 transition hover:bg-navy-850 focus:bg-navy-850 focus:outline-none"
+                      >
+                        <td className="px-3 py-4 text-center align-middle">
+                          <span className={`font-mono text-base font-bold ${rank && rank <= 3 ? "text-mint-400" : "text-ink-400"}`}>
                             {rank ? `#${rank}` : "—"}
                           </span>
                         </td>
-                        <td className="px-2 py-3 align-middle">
-                          <Link href={`/player/${encodeURIComponent(player.ign)}`} className="flex items-center gap-2.5">
-                            <Head ign={player.ign} size={32} className="ring-1 ring-slate-200" />
-                            <span className="truncate text-[14px] font-semibold text-ink-100 transition group-hover:text-brand-300">{player.ign}</span>
-                          </Link>
+                        <td className="px-3 py-4 align-middle">
+                          <div className="flex items-center gap-3">
+                            <Head ign={player.ign} size={40} className="ring-1 ring-slate-200" />
+                            <span className="truncate text-[15px] font-semibold text-ink-100 transition group-hover:text-brand-300">{player.ign}</span>
+                          </div>
                         </td>
                         {GAMEMODES.map((g) => {
                           const t = tierFor(player, g.id);
                           return (
-                            <td key={g.id} className="px-1 py-3 text-center align-middle">
-                              {t ? (
-                                <TierBadge tier={t} peak={peakFor(player, g.id)} size="xs" />
-                              ) : (
-                                <span className="text-[10px] text-ink-500">—</span>
-                              )}
+                            <td key={g.id} className="px-2 py-4 text-center align-middle">
+                              <div className="flex flex-col items-center gap-1.5">
+                                <ModeIcon id={g.id} size={16} className={t ? "opacity-100" : "opacity-30"} />
+                                {t ? (
+                                  <TierBadge tier={t} peak={peakFor(player, g.id)} size="xs" />
+                                ) : (
+                                  <span className="text-[11px] text-ink-500">—</span>
+                                )}
+                              </div>
                             </td>
                           );
                         })}
-                        <td className="whitespace-nowrap px-3 py-3 text-right align-middle">
-                          <span className="font-display text-base font-bold text-ink-100">{formatNumber(points)}</span>
-                          <span className="ml-1 text-[10px] text-ink-500">pts</span>
+                        <td className="whitespace-nowrap px-4 py-4 text-right align-middle">
+                          <span className="font-display text-lg font-bold text-ink-100">{formatNumber(points)}</span>
+                          <span className="ml-1 text-[11px] text-ink-500">pts</span>
                         </td>
                       </tr>
                     ))}
@@ -253,9 +274,10 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
                     <ul className="divide-y divide-slate-100">
                       {column.rows.map(({ player, points, tier, rank }) => (
                         <li key={String(player.id)}>
-                          <Link
-                            href={`/player/${encodeURIComponent(player.ign)}`}
-                            className="group flex items-center gap-3 px-3 py-2 transition hover:bg-navy-850"
+                          <button
+                            type="button"
+                            onClick={() => openPlayer(player.ign)}
+                            className="group flex w-full items-center gap-3 px-3 py-2 text-left transition hover:bg-navy-850"
                           >
                             <Head ign={player.ign} size={28} shape="square" />
                             <span className="flex min-w-0 flex-col">
@@ -266,7 +288,7 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
                               </span>
                             </span>
                             <span className="ml-auto shrink-0 whitespace-nowrap font-mono text-[11px] font-semibold leading-none text-mint-300">{formatNumber(points)} pts</span>
-                          </Link>
+                          </button>
                         </li>
                       ))}
                     </ul>

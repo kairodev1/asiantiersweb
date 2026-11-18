@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { createPortal } from "react-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Menu, X, Search, Loader2, Home, Trophy, Medal, User } from "lucide-react";
 import { tierStyle, cleanTier, GAMEMODES, gamemodeIcon } from "./tiers";
@@ -303,8 +304,8 @@ export function Nav() {
 export function GamemodeBar({ value, onChange }: { value: string; onChange: (id: string) => void }) {
   const tabs = [{ id: "overall", name: "Overall" }, ...GAMEMODES.map((g) => ({ id: g.id, name: g.name }))];
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-navy-900 p-1.5" role="tablist" aria-label="Gamemodes">
-      <div className="flex min-w-max gap-1">
+    <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-navy-900 p-2" role="tablist" aria-label="Gamemodes">
+      <div className="flex min-w-max gap-2">
         {tabs.map((m) => {
           const selected = value === m.id;
           return (
@@ -313,13 +314,13 @@ export function GamemodeBar({ value, onChange }: { value: string; onChange: (id:
               role="tab"
               aria-selected={selected}
               onClick={() => onChange(m.id)}
-              className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold transition duration-200 ${
+              className={`flex items-center gap-3 whitespace-nowrap rounded-xl px-5 py-3 text-base font-semibold transition duration-200 ${
                 selected
                   ? "bg-navy-700 text-ink-100 ring-1 ring-inset ring-slate-200"
                   : "text-ink-300 hover:bg-navy-800 hover:text-ink-100"
               }`}
             >
-              <ModeIcon id={m.id} size={18} className={selected ? "opacity-100" : "opacity-70"} />
+              <ModeIcon id={m.id} size={24} className={selected ? "opacity-100" : "opacity-70"} />
               <span>{m.name}</span>
             </button>
           );
@@ -334,25 +335,48 @@ export function GamemodeBar({ value, onChange }: { value: string; onChange: (id:
 export function TierBadge({ tier, peak, size = "md" }: { tier?: string | null; peak?: string | null; size?: "xs" | "sm" | "md" | "lg" }) {
   const s = tierStyle(tier);
   const sizes = {
-    xs: "h-5 min-w-[2.5rem] gap-1 px-1.5 text-[10px]",
-    sm: "h-6 min-w-[3rem] px-2 text-[11px]",
+    xs: "h-6 min-w-[3rem] gap-1 px-2 text-[11px]",
+    sm: "h-7 min-w-[3.25rem] px-2.5 text-xs",
     md: "h-8 min-w-[3.75rem] px-2.5 text-xs",
     lg: "h-11 min-w-[5rem] px-3 text-base",
   }[size];
   const displayPeak = peak ?? tier;
   const label = `Peak: ${displayPeak ?? "-"}`;
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+
+  useEffect(() => {
+    if (!open || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    setPos({ top: rect.top + window.scrollY - 8, left: rect.left + rect.width / 2 + window.scrollX });
+  }, [open]);
+
   return (
-    <span className="group/badge relative inline-flex">
+    <span
+      ref={ref}
+      className="relative inline-flex"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
       <span
         title={label}
         className={`inline-flex items-center justify-center gap-1.5 rounded-md font-mono font-bold tabular-nums ring-1 ring-inset whitespace-nowrap ${s.bg} ${s.text} ${s.ring} ${sizes}`}
       >
-        <span className={`${size === "xs" ? "h-1 w-1" : "h-1.5 w-1.5"} rounded-full ${s.dot}`} />
+        <span className={`${size === "xs" ? "h-1.5 w-1.5" : "h-1.5 w-1.5"} rounded-full ${s.dot}`} />
         {cleanTier(tier) ?? "No Tier"}
       </span>
-      <span className="pointer-events-none absolute left-1/2 top-full z-50 mt-1 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-navy-900 px-2 py-1 text-[10px] font-semibold text-ink-100 shadow-lg ring-1 ring-slate-200 group-hover/badge:block">
-        {label}
-      </span>
+      {open && pos && typeof document !== "undefined"
+        ? createPortal(
+            <span
+              className="pointer-events-none fixed z-[9999] -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md bg-navy-900 px-2 py-1 text-[10px] font-semibold text-ink-100 shadow-lg ring-1 ring-slate-200"
+              style={{ top: pos.top, left: pos.left }}
+            >
+              {label}
+            </span>,
+            document.body
+          )
+        : null}
     </span>
   );
 }
