@@ -45,7 +45,7 @@ export default async function HomePage() {
   return (
     <div className="container-x nav-offset animate-page-in">
       {/* ---------- Hero ---------- */}
-      <section className="grid items-center gap-8 lg:grid-cols-[1.1fr_1fr]">
+      <section className="grid items-center gap-8 rounded-3xl border border-slate-200 bg-navy-900/70 p-6 lg:grid-cols-[1.1fr_1fr] lg:p-10">
         <div className="animate-fade-up">
           <span className="eyebrow">
             <Sparkles className="h-3 w-3" />

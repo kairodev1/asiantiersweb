@@ -140,49 +140,49 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
           ) : (
             <div className="card overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[880px] border-collapse text-sm">
+                <table className="w-full min-w-[1040px] border-collapse text-sm table-fixed">
                   <thead>
                     <tr className="text-left text-xs font-medium text-ink-400">
-                      <th className="w-14 px-4 py-3.5 font-medium">Rank</th>
-                      <th className="w-36 px-2 py-3.5 font-medium">Player</th>
+                      <th className="w-20 px-4 py-3.5 font-medium">Rank</th>
+                      <th className="w-44 px-2 py-3.5 font-medium">Player</th>
                       <th className="px-2 py-3.5 text-center font-medium">Tier matrix</th>
-                      <th className="w-24 px-4 py-3.5 text-right font-medium">Points</th>
+                      <th className="w-28 px-4 py-3.5 text-right font-medium">Points</th>
                     </tr>
                   </thead>
                   <tbody>
                     {currentPage.map(({ player, rank, points }) => {
                       return (
                         <tr key={String(player.id)} className="group border-t border-slate-200 transition hover:bg-navy-850">
-                          <td className="px-4 py-3.5 align-middle">
-                            <Head ign={player.ign} size={44} className="ring-1 ring-slate-200" />
+                          <td className="px-4 py-4 align-middle">
+                            <Head ign={player.ign} size={40} className="ring-1 ring-slate-200" />
                           </td>
-                          <td className="px-2 py-3.5 align-middle">
+                          <td className="px-2 py-4 align-middle">
                             <Link href={`/player/${encodeURIComponent(player.ign)}`} className="flex min-w-0 flex-col">
                               <span className="flex items-center gap-2">
-                                <span className="font-mono text-[11px] font-bold text-ink-500">{rank ? `#${rank}` : "—"}</span>
+                                <span className="font-mono text-[11px] font-bold text-brand-300">{rank ? `#${rank}` : "—"}</span>
                                 <span className="truncate text-[15px] font-semibold text-ink-100 transition group-hover:text-brand-300">{player.ign}</span>
                               </span>
                               <span className="mt-0.5 text-xs text-ink-500">Overall ranking</span>
                             </Link>
                           </td>
-                          <td className="px-2 py-3.5 align-middle">
-                            <div className="grid grid-cols-8 gap-2">
+                          <td className="px-2 py-4 align-middle">
+                            <div className="grid grid-cols-8 gap-1.5">
                               {GAMEMODES.map((g) => {
                                 const t = tierFor(player, g.id);
                                 return (
-                                  <div key={g.id} className="flex flex-col items-center gap-1.5" title={`${g.name}${t ? `: ${t}` : ""}`}>
-                                    <ModeIcon id={g.id} size={22} className={t ? "opacity-100" : "opacity-40"} />
+                                  <div key={g.id} className="flex flex-col items-center gap-1" title={`${g.name}${t ? `: ${t}` : ""}`}>
+                                    <ModeIcon id={g.id} size={20} className={t ? "opacity-100" : "opacity-35"} />
                                     {t ? (
-                                      <TierBadge tier={t} peak={peakFor(player, g.id)} size="sm" />
+                                      <TierBadge tier={t} peak={peakFor(player, g.id)} size="xs" />
                                     ) : (
-                                      <span className="text-[11px] leading-6 text-ink-500">—</span>
+                                      <span className="text-[10px] leading-5 text-ink-500">—</span>
                                     )}
                                   </div>
                                 );
                               })}
                             </div>
                           </td>
-                          <td className="px-4 py-3.5 text-right align-middle">
+                          <td className="px-4 py-4 text-right align-middle">
                             <span className="font-display text-lg font-bold text-ink-100">{formatNumber(points)}</span>
                             <span className="ml-1 text-[11px] text-ink-500">pts</span>
                           </td>

@@ -5,36 +5,44 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Dark charcoal surfaces (text + dark elements) — kept name for compatibility
+        // Deep charcoal / black surfaces
         navy: {
-          950: "#f4f6f9",
-          900: "#ffffff",
-          850: "#f1f5f9",
-          800: "#e8edf3",
-          700: "#d9e2ec",
-          600: "#b8c4d4",
+          950: "#050505",
+          900: "#0b0b0d",
+          850: "#111114",
+          800: "#17171b",
+          700: "#222228",
+          600: "#3a3a42",
         },
-        // Light blue — subtle primary accent
+        // Red primary accent
         brand: {
-          300: "#7dd3fc",
-          400: "#38bdf8",
-          500: "#0ea5e9",
-          600: "#0284c7",
+          300: "#fca5a5",
+          400: "#f87171",
+          500: "#ef4444",
+          600: "#dc2626",
         },
-        // Dark green — main brand colour
+        // Darker red secondary accent
         mint: {
-          300: "#16a34a",
-          400: "#15803d",
-          500: "#166534",
-          600: "#14532d",
+          300: "#fca5a5",
+          400: "#ef4444",
+          500: "#dc2626",
+          600: "#b91c1c",
         },
-        // Dark charcoal text scale (light theme)
+        // Light text scale for dark theme
         ink: {
-          100: "#0f172a",
-          200: "#1e293b",
-          300: "#334155",
-          400: "#475569",
-          500: "#64748b",
+          100: "#fafafa",
+          200: "#e5e5e5",
+          300: "#d4d4d4",
+          400: "#a3a3a3",
+          500: "#737373",
+        },
+        // Dark borders/surfaces used throughout
+        slate: {
+          100: "#1f1f23",
+          200: "#262626",
+          300: "#3f3f46",
+          400: "#52525b",
+          500: "#71717a",
         },
       },
       fontFamily: {
@@ -42,8 +50,8 @@ const config: Config = {
         display: ["var(--font-display)", "var(--font-sans)", "sans-serif"],
       },
       boxShadow: {
-        card: "0 1px 0 0 rgba(15,23,42,0.04) inset, 0 8px 24px -16px rgba(15,23,42,0.18)",
-        rise: "0 12px 28px -16px rgba(15,23,42,0.22)",
+        card: "0 1px 0 0 rgba(255,255,255,0.04) inset, 0 12px 32px -16px rgba(0,0,0,0.8)",
+        rise: "0 18px 40px -16px rgba(0,0,0,0.9)",
       },
       animation: {
         "fade-up": "fadeUp .5s cubic-bezier(.16,1,.3,1) both",
