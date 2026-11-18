@@ -12,7 +12,6 @@ export const metadata: Metadata = {
   description: "The legends of the AsianTiers Minecraft PvP scene — AsianTiers Hall of Fame.",
 };
 
-// Solid background tints (no gradients) for inductees without an image.
 const TINTS = ["bg-navy-800", "bg-navy-850", "bg-navy-700"];
 
 export default async function HallOfFamePage() {
@@ -56,7 +55,7 @@ export default async function HallOfFamePage() {
         </div>
       ) : (
         <>
-          {/* Featured entry */}
+          {}
           <article className="card relative mt-10 grid overflow-hidden md:grid-cols-[1fr_1.1fr]">
             <div className="relative min-h-64 overflow-hidden">
               {featured.image ? (

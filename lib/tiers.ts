@@ -1,5 +1,3 @@
-// Shared, dependency-free tier/gamemode definitions.
-// Server and client both import from here — never put secrets in this file.
 
 export type GamemodeId =
   | "sword"
@@ -19,17 +17,17 @@ export type GamemodeId =
 export type Gamemode = {
   id: GamemodeId;
   name: string;
-  /** Tier column in `players` — fixed, never derived from client input. */
+  
   tierColumn: string;
-  /** Peak tier column in `players` — fixed, never derived from client input. */
+  
   peakColumn: string;
-  /** Points column in `players` — fixed, never derived from client input. */
+  
   pointsColumn: string;
-  /** Lower-case aliases accepted by the bot API. */
+  
   aliases: string[];
-  /** Discord custom emoji token, if applicable. */
+  
   emoji?: string;
-  /** Discord waitlist role id, if applicable. */
+  
   waitlistRoleId?: string;
 };
 
@@ -58,7 +56,7 @@ export function resolveGamemode(input: unknown): Gamemode | null {
   return GAMEMODES.find((g) => g.id === key || g.aliases.includes(key)) ?? null;
 }
 
-/** Tier order, highest first (active before retired at equal strength). */
+
 export const TIERS = [
   "HT1", "RHT1", "LT1", "RLT1",
   "HT2", "RHT2", "LT2", "RLT2",
@@ -68,10 +66,7 @@ export const TIERS = [
 ] as const;
 export type Tier = (typeof TIERS)[number];
 
-/**
- * The single points system used everywhere (website + Discord bot sync).
- * Each gamemode awards its tier's points; overall = sum across gamemodes.
- */
+
 export const TIER_POINTS: Record<Tier, number> = {
   HT1: 60,
   RHT1: 60,
@@ -111,14 +106,14 @@ export function isRetiredTier(tier: string | null | undefined): boolean {
   return typeof tier === "string" && tier.trim().toUpperCase().startsWith("R");
 }
 
-/** Map a retired tier back to its active peak tier. */
+
 export function activeFromTier(tier: string | null | undefined): string | null {
   const t = cleanTier(tier);
   if (!t) return null;
   return t.startsWith("R") ? t.slice(1) : t;
 }
 
-/** Retired tier for a given peak tier. */
+
 export function retiredFromPeak(peak: string | null | undefined): Tier | null {
   const t = cleanTier(peak);
   if (!t) return null;
@@ -126,15 +121,15 @@ export function retiredFromPeak(peak: string | null | undefined): Tier | null {
   return TIER_SET.has(r) ? (r as Tier) : null;
 }
 
-/** Points awarded for a tier (0 when unranked / unknown). */
+
 export function pointsForTier(tier: string | null | undefined): number {
   return TIER_POINTS[cleanTier(tier) as Tier] ?? 0;
 }
 
-/** Tiers that may legitimately appear in the DB but are outside the six ranked tiers. */
+
 const SPECIAL_TIERS = new Set(["UNRANKED", "NONE", "UNR", "NA", "N/A", "-", ""]);
 
-/** Normalise whatever is stored in the DB. Returns a canonical tier or null. */
+
 export function cleanTier(input: unknown): string | null {
   if (typeof input !== "string") return null;
   const t = input.trim().toUpperCase();
@@ -142,19 +137,19 @@ export function cleanTier(input: unknown): string | null {
   return t;
 }
 
-/** Tier number for the grouping: LT5/HT5 → 5 … LT1/HT1 → 1. */
+
 export function tierNumber(tier: string | null | undefined): number | null {
   const t = cleanTier(tier);
   const m = t?.match(/^R?[LH]T([1-5])$/);
   return m ? Number(m[1]) : null;
 }
 
-/** Tiers belonging to one tier group, highest first. */
+
 export function tiersInGroup(n: number): Tier[] {
   return TIERS.filter((t) => tierNumber(t) === n);
 }
 
-/** Group heading for a tier number. */
+
 export const TIER_GROUP_LABEL: Record<number, string> = {
   5: "Tier 5",
   4: "Tier 4",
@@ -163,12 +158,12 @@ export const TIER_GROUP_LABEL: Record<number, string> = {
   1: "Tier 1",
 };
 
-/** Numeric weight for sorting: uses the tier's points so HT/LT and retired order correctly. */
+
 export function tierRank(tier: string | null | undefined): number {
   return pointsForTier(tier);
 }
 
-/** Short style tokens per tier (used by <TierBadge/>). Only light blue, green and white. */
+
 export function tierStyle(tier: string | null | undefined) {
   switch (cleanTier(tier)) {
     case "HT1":
@@ -210,7 +205,7 @@ export function tierStyle(tier: string | null | undefined) {
   }
 }
 
-/** Local gamemode icons (copied from the design assets into /public/icons). */
+
 export const GAMEMODE_ICON: Record<string, string> = {
   overall: "/icons/overall.svg",
   sword: "/icons/sword.svg",

@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 const IGN_RE = /^[A-Za-z0-9_]{3,16}$/;
 
-/** Postgres ids are numeric (int/bigint or identity). Detect the column type so inserts never need a client-supplied id. */
+
 let idKind: "number" | "uuid" | "text" | null = null;
 
 async function detectIdKind(db: ReturnType<typeof adminClient>): Promise<"number" | "uuid" | "text"> {
@@ -43,7 +43,6 @@ async function guard() {
   if (!(await isAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  // Writes require a service-role key that belongs to the configured project.
   if (!serviceKeyUsable()) {
     return NextResponse.json(
       { error: "Server is missing a valid SUPABASE_SERVICE_ROLE_KEY for this Supabase project." },
@@ -81,7 +80,6 @@ export async function POST(req: Request) {
   const kind = await detectIdKind(db);
 
   const insertPayload: Record<string, unknown> = { ...parsed.value };
-  // Only send an id when the column has no default (legacy serial-less setups).
   if (kind === "uuid") {
     const { data: latest } = await db.from("hall_of_fame").select("id").order("created_at", { ascending: false }).limit(1);
     if (!latest || latest.length === 0) insertPayload.id = crypto.randomUUID();
@@ -89,7 +87,6 @@ export async function POST(req: Request) {
 
   let { data, error } = await db.from("hall_of_fame").insert(insertPayload).select().single();
 
-  // Fallback: if the id column requires an explicit numeric value, derive one safely.
   if (error && /null value in column "id"/i.test(error.message)) {
     const { data: rows } = await db.from("hall_of_fame").select("id");
     const maxNumeric = Math.max(0, ...(rows ?? []).map((r) => Number(r.id)).filter((n) => Number.isFinite(n)));

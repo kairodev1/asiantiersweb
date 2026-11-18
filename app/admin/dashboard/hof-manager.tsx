@@ -67,7 +67,7 @@ export function HofManager({ initialEntries, initialError }: { initialEntries: H
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1.15fr_1fr]">
-      {/* Entries list */}
+      {}
       <section className="card overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3.5">
           <h2 className="flex items-center gap-2 text-sm font-bold text-ink-100">
@@ -128,7 +128,7 @@ export function HofManager({ initialEntries, initialError }: { initialEntries: H
         )}
       </section>
 
-      {/* Editor */}
+      {}
       <section className="card h-fit p-5">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-ink-100">{draft ? (draft.id !== undefined ? "Edit entry" : "New entry") : "Entry editor"}</h2>

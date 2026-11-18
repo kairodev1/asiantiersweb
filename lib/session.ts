@@ -1,5 +1,3 @@
-// Edge-safe session token logic (Web Crypto only) — used by middleware and server routes.
-// The signing key is HMAC(SHA-256) derived from the admin password + service role key, never sent to the browser.
 
 export const ADMIN_COOKIE = "at_admin";
 export const SESSION_TTL_SECONDS = 60 * 60 * 8; // 8 hours
@@ -53,7 +51,6 @@ export async function isValidToken(token: string | undefined | null): Promise<bo
 export async function verifyPassword(candidate: unknown): Promise<boolean> {
   const expected = process.env.ADMIN_PASSWORD;
   if (!expected || typeof candidate !== "string" || candidate.length === 0) return false;
-  // Compare HMAC digests to keep the comparison constant-time.
   const a = await crypto.subtle.sign("HMAC", await derivedKey(), enc.encode(`pw:${candidate}`));
   const b = await crypto.subtle.sign("HMAC", await derivedKey(), enc.encode(`pw:${expected}`));
   const av = new Uint8Array(a);

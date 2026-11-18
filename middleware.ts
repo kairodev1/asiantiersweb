@@ -1,12 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { ADMIN_COOKIE, isValidToken } from "@/lib/session";
 
-// Edge-safe guard: verifies the signed session cookie before admin pages/APIs load.
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // /api is the API documentation page (not linked in navigation).
-  // Rewriting here keeps every /api/* route handler untouched for the Discord bot.
   if (pathname === "/api" || pathname === "/api/") {
     const url = req.nextUrl.clone();
     url.pathname = "/api-docs";
@@ -15,7 +12,6 @@ export async function middleware(req: NextRequest) {
 
   const authed = await isValidToken(req.cookies.get(ADMIN_COOKIE)?.value);
 
-  // The docs route only exists behind the /api rewrite.
   if (pathname.startsWith("/api-docs")) {
     return NextResponse.redirect(new URL("/api", req.url));
   }

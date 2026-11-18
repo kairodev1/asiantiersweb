@@ -34,7 +34,6 @@ export default async function HomePage() {
 
   const totalTierEntries = players.reduce((n, p) => n + GAMEMODES.filter((g) => tierFor(p, g.id)).length, 0);
 
-  // Per-gamemode leaders (real data only)
   const modeLeaders = GAMEMODES.map((g) => {
     const best = players
       .filter((p) => tierFor(p, g.id))
@@ -44,7 +43,7 @@ export default async function HomePage() {
 
   return (
     <div className="container-x nav-offset animate-page-in">
-      {/* ---------- Hero ---------- */}
+      {}
       <section className="grid items-center gap-8 rounded-3xl border border-slate-200 bg-navy-900/70 p-6 lg:grid-cols-[1.1fr_1fr] lg:p-10">
         <div className="animate-fade-up">
           <span className="eyebrow">
@@ -82,7 +81,7 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* Podium */}
+        {}
         <div>
           {top3.length > 0 ? (
             <div className="grid gap-3">
@@ -117,7 +116,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ---------- Stats ---------- */}
+      {}
       <section className="mt-10 grid grid-cols-2 gap-3 lg:grid-cols-3">
         <Stat label="Ranked players" value={formatNumber(ranked.length)} />
         <Stat label="Tier placements" value={formatNumber(totalTierEntries)} hint="Across 13 gamemodes" />
@@ -134,7 +133,7 @@ export default async function HomePage() {
         </p>
       )}
 
-      {/* ---------- Gamemodes ---------- */}
+      {}
       <section className="mt-12">
         <SectionHeader
           title="Gamemodes"
@@ -170,7 +169,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ---------- Gamemode leaders / Hall of Fame ---------- */}
+      {}
       <section className="mt-16 grid gap-4 lg:grid-cols-[1.1fr_1fr]">
         <div className="card p-5">
           <div className="flex items-center justify-between">
@@ -226,7 +225,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ---------- Discord CTA ---------- */}
+      {}
       <section className="mt-12">
         <div className="rounded-3xl border border-slate-200 bg-navy-900 px-6 py-10 sm:px-10">
           <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">

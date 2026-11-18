@@ -3,7 +3,6 @@ import { createElement as h, Fragment } from "react";
 import { Terminal, ShieldCheck, Database, Gamepad2 } from "lucide-react";
 import { GAMEMODES, TIERS, TIER_POINTS } from "@/lib/tiers";
 
-// Served from /api by the middleware rewrite (not linked in the site navigation).
 export const metadata: Metadata = {
   title: "API Documentation",
   description: "AsianTiers API documentation — used by the AsianTiers Discord bot to sync player tiers.",

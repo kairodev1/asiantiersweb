@@ -1,5 +1,3 @@
-// Pure serializer for GET /api/mod/players (Minecraft TierTagger integration).
-// Mirrors the KairoTiers mod API contract: { schema, count, players: [{ ign, gamemodes }] }.
 
 export const TIER_COLUMNS: Record<string, string> = {
   sword: "sword_tier",

@@ -7,7 +7,6 @@ import { serviceKeyUsable } from "@/lib/supabase";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Columns we are allowed to write. Everything else is derived server-side.
 const GAMEMODE_COLUMNS = [
   "sword_tier", "sword_peak_tier", "sword_points",
   "mace_tier", "mace_peak_tier", "mace_points",
@@ -24,9 +23,6 @@ const GAMEMODE_COLUMNS = [
   "cart_tier", "cart_peak_tier", "cart_points",
 ] as const;
 
-const IGN_RE = /^[A-Za-z0-9_]{3,16}$/;
-const DISCORD_RE = /^\d{5,25}$/;
-
 type Row = Record<string, string | null>;
 
 function json(status: number, body: Record<string, unknown>) {
@@ -39,7 +35,7 @@ function safeEqual(a: string, b: string) {
   return ab.length === bb.length && timingSafeEqual(ab, bb);
 }
 
-/** Overall = sum of each gamemode's tier points (same table the website uses). */
+
 function computeStats(row: Row) {
   let points = 0;
   for (const g of GAMEMODES) {
@@ -50,13 +46,11 @@ function computeStats(row: Row) {
 }
 
 export async function POST(req: Request) {
-  // 1. Authenticate the bot
   const secret = process.env.BOT_SECRET;
   const provided = req.headers.get("x-bot-secret") ?? "";
   if (!secret) return json(500, { error: "Server is missing BOT_SECRET" });
   if (!provided || !safeEqual(provided, secret)) return json(401, { error: "Invalid bot secret" });
 
-  // 2. Parse + validate the body
   let body: Record<string, unknown>;
   try {
     body = await req.json();
@@ -78,7 +72,6 @@ export async function POST(req: Request) {
   if (hasGamemode && !gamemode) return json(422, { error: "gamemode must be one of Sword, Mace, Axe, Crystal, NethPot, DiaPot, SMP, UHC, SpearMace, Diamond SMP, Manhunt, ShieldLess UHC, Cart" });
   if (tier && !gamemode) return json(422, { error: "gamemode is required when a tier is provided" });
 
-  // 3. Service-role client (never exposed to browsers)
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !serviceKey) return json(500, { error: "Server is missing Supabase credentials" });
@@ -90,7 +83,6 @@ export async function POST(req: Request) {
   try {
     if (!ign) return json(400, { error: "ign is required" });
 
-    // 4. Find by Discord ID (skip the lookup when no Discord ID was supplied)
     let byDiscord: Record<string, unknown> | null = null;
     let e1: { message: string } | null = null;
     if (discordId) {
@@ -103,9 +95,7 @@ export async function POST(req: Request) {
     let target = byDiscord as Record<string, unknown> | null;
     let action: "updated" | "linked" | "created" = "updated";
 
-    // Existing profiles keep their canonical IGN — never overwrite it here.
     if (!target) {
-      // 5. No Discord match → check IGN (case-insensitive)
       const { data: candidates, error: e2 } = await db
         .from("players")
         .select("*")
@@ -126,7 +116,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // 6. Touch gamemode columns only when a gamemode is provided.
     let tierColumn: string | null = null;
     let peakColumn: string | null = null;
     let pointsColumn: string | null = null;
@@ -140,7 +129,6 @@ export async function POST(req: Request) {
       }
       const activePeak = activeFromTier(tier);
       const incomingPeakStrength = pointsForTier(activePeak);
-      // Determine the new peak (never decrease).
       let newPeak: string | null = activePeak;
       const existingPeakRaw = target ? (target as Record<string, unknown>)[peakColumn] : null;
       const existingPeak = typeof existingPeakRaw === "string" ? existingPeakRaw : null;
@@ -171,15 +159,12 @@ export async function POST(req: Request) {
         error = res.error as { code?: string; message: string } | null;
       }
 
-      // Discord ID might already be taken by an orphan row - report instead of duplicating.
       if (error && error.code === "23505") {
         return json(409, { error: "Discord ID or IGN conflicts with another player profile" });
       }
-      // Surface schema mismatches for other columns (e.g. missing updated_at) clearly.
       if (error) return json(500, { error: `Failed to update player: ${error.message}` });
       row = data;
     } else {
-      // 7. Create a new profile. `id` is omitted on purpose — the DB generates it.
       const insertPayload: Record<string, unknown> = {
         discord_id: discordId || null,
         ign,
@@ -194,7 +179,6 @@ export async function POST(req: Request) {
       let inserted: Record<string, unknown> | null = data;
 
       if (error && error.code === "23505") {
-        // Race with another request or an existing IGN — resolve it once.
         const { data: again } = await db.from("players").select("*").ilike("ign", ign).limit(1).maybeSingle();
         if (again) {
           const payload = again.discord_id ? { ...update } : { ...update, discord_id: discordId || null };

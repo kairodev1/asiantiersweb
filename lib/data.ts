@@ -13,10 +13,7 @@ export function peakFor(player: Player, gamemodeId: string): string | null {
   return g ? cleanTier(player[g.peakColumn]) : null;
 }
 
-/**
- * Points for one gamemode. The tier determines the points (single shared table in lib/tiers):
- * LT5=1 … HT1=25. A stored points value is only used when the player has no tier.
- */
+
 export function pointsFor(player: Player, gamemodeId: string): number {
   const tier = tierFor(player, gamemodeId);
   if (tier) return pointsForTier(tier);
@@ -33,19 +30,18 @@ export function rankedModes(player: Player) {
   return modesOf(player).filter((m) => m.tier);
 }
 
-/** Overall points = sum of every gamemode's tier points. */
+
 export function totalPoints(player: Player): number {
   return GAMEMODES.reduce((sum, g) => sum + pointsFor(player, g.id), 0);
 }
 
-/** Best tier the player holds (highest tier across gamemodes). */
+
 export function bestTier(player: Player): string | null {
   const stored = cleanTier(player.overall_tier);
   const ranked = rankedModes(player)
     .map((m) => m.tier!)
     .sort((a, b) => tierRank(b) - tierRank(a));
   const best = ranked[0] ?? null;
-  // Keep a stored overall tier when it is at least as strong as their best gamemode tier.
   if (stored && tierRank(stored) >= tierRank(best)) return stored;
   return best;
 }
@@ -54,10 +50,7 @@ export function sortByPoints<T extends Player>(players: T[]): T[] {
   return [...players].sort((a, b) => totalPoints(b) - totalPoints(a) || a.ign.localeCompare(b.ign));
 }
 
-/**
- * Competition ranking: equal points share the same position (1, 2, 2, 4).
- * Returns a map of ign (lower-case) → rank.
- */
+
 export function rankMap(players: Player[], gamemodeId?: string): Map<string, number> {
   const valueOf = (p: Player) => (gamemodeId ? pointsFor(p, gamemodeId) : totalPoints(p));
   const sorted = [...players]
@@ -73,7 +66,7 @@ export function rankMap(players: Player[], gamemodeId?: string): Map<string, num
   return map;
 }
 
-/** Default Steve render, used as the final fallback for any skin failure. */
+
 export const STEVE_HEAD = "https://mc-heads.net/avatar/MHF_Steve/128";
 
 export function formatNumber(n: number) {

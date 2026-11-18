@@ -11,19 +11,17 @@ import { Head, TierBadge, Empty, Spinner, GamemodeBar, ModeIcon } from "@/lib/ui
 
 const PAGE_SIZE = 50;
 const REFRESH_MS = 60_000;
-// Tier board columns, highest first (matches the reference layout).
 const BOARD = [1, 2, 3, 4, 5] as const;
 
 type Row = { player: Player; rank: number; points: number };
 
-/** Overall rows: highest total tier points first; equal points share a rank. */
+
 function buildOverallRows(players: Player[]): Row[] {
   const ranks = rankMap(players);
   const ranked = players
     .filter((p) => ranks.has(p.ign.toLowerCase()))
     .map((player) => ({ player, points: totalPoints(player), rank: ranks.get(player.ign.toLowerCase()) ?? 0 }))
     .sort((a, b) => b.points - a.points || a.player.ign.localeCompare(b.player.ign));
-  // Newly registered / untested players have no tier yet but must still be listed.
   const unranked = players
     .filter((p) => !ranks.has(p.ign.toLowerCase()))
     .map((player) => ({ player, points: totalPoints(player), rank: 0 }))
@@ -31,7 +29,7 @@ function buildOverallRows(players: Player[]): Row[] {
   return [...ranked, ...unranked];
 }
 
-/** One gamemode's players split into Tier 1–5 boards, points descending inside each. */
+
 function buildBoard(players: Player[], gamemodeId: string) {
   const ranked = players.filter((p) => tierFor(p, gamemodeId));
   const rankOf = rankMap(players, gamemodeId);
@@ -50,7 +48,7 @@ function buildBoard(players: Player[], gamemodeId: string) {
   }));
 }
 
-/** Small coloured dot used in the column / row headers. */
+
 const DOT_COLORS = ["bg-brand-400", "bg-mint-400", "bg-brand-300", "bg-mint-300", "bg-ink-400"];
 
 export function RankingClient({ initialPlayers, error }: { initialPlayers: Player[]; error: string | null }) {
@@ -63,7 +61,6 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
   const [, setUpdatedAt] = useState<Date | null>(error ? null : new Date());
   const [loadError, setLoadError] = useState<string | null>(error);
 
-  // Live leaderboard: refresh every 60s, and when the tab becomes visible again.
   useEffect(() => {
     let cancelled = false;
     const refresh = async () => {
@@ -112,7 +109,7 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
 
   return (
     <div className="animate-page-in">
-      {/* ---------- Page header ---------- */}
+      {}
       <div className="border-b border-slate-200 pb-7">
         <p className="text-[13px] font-bold uppercase tracking-wide text-mint-400">Leaderboard</p>
         <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-ink-100 sm:text-4xl">Player rankings</h1>
@@ -125,7 +122,7 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
 
       {loadError && <p className="mt-3 rounded-xl border border-brand-400/30 bg-navy-800 px-4 py-2.5 text-xs text-brand-300">{loadError}</p>}
 
-      {/* ---------- Overall standings ---------- */}
+      {}
       {mode === "overall" ? (
         <section key="overall" className="mt-7 animate-fade-in">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -215,7 +212,7 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
           )}
         </section>
       ) : (
-        /* ---------- Gamemode tier board ---------- */
+        
         <section key={mode} className="mt-7 animate-fade-in">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-[17px] font-bold text-ink-100">{activeMode?.name} tiers</h2>

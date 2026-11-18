@@ -4,7 +4,6 @@ import { setSessionCookie } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
-// Simple in-memory throttle to slow brute-force attempts (per instance).
 const attempts = new Map<string, { count: number; reset: number }>();
 const WINDOW = 10 * 60 * 1000;
 const MAX = 8;

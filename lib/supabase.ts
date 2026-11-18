@@ -1,6 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-// --- Types matching the existing schema (column names are authoritative) ---
 
 export type Player = {
   id: number | string;
@@ -108,7 +107,7 @@ export const PLAYER_COLUMNS = [
   "created_at",
 ] as const;
 
-/** Public read-only client. Only safe, NEXT_PUBLIC_* values reach the browser. */
+
 export function publicClient(): SupabaseClient {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = publicKey();
@@ -116,7 +115,7 @@ export function publicClient(): SupabaseClient {
   return createClient(url, key, { auth: { persistSession: false } });
 }
 
-/** Server-only client for writes. Never import this into a client component. */
+
 export function adminClient(): SupabaseClient {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -127,7 +126,7 @@ export function adminClient(): SupabaseClient {
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }
 
-/** Project ref encoded in a Supabase JWT (legacy keys). Returns null for opaque keys (sb_publishable_…). */
+
 function projectRef(key: string | undefined): string | null {
   try {
     const payload = JSON.parse(Buffer.from(key!.split(".")[1], "base64").toString("utf8"));
@@ -137,12 +136,12 @@ function projectRef(key: string | undefined): string | null {
   }
 }
 
-/** Public key (publishable / anon). */
+
 export function publicKey(): string | undefined {
   return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 }
 
-/** True when the service-role key is configured AND belongs to the same project as our URL. */
+
 export function serviceKeyUsable(): boolean {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -151,10 +150,7 @@ export function serviceKeyUsable(): boolean {
   return ref ? url.includes(ref) : true;
 }
 
-/**
- * Server-side read client. Uses the service role key when it is present and belongs
- * to the configured project, otherwise falls back to the public read-only key.
- */
+
 export function readClient(): SupabaseClient {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = serviceKeyUsable() ? process.env.SUPABASE_SERVICE_ROLE_KEY : publicKey();
@@ -162,7 +158,6 @@ export function readClient(): SupabaseClient {
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }
 
-// --- Shared data accessors (used by server components too) ---
 
 export async function fetchAllPlayers(client: SupabaseClient): Promise<Player[]> {
   const PAGE = 1000;

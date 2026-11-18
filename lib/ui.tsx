@@ -1,4 +1,4 @@
-/* Shared client-side UI primitives + nav. Small and dependency-light on purpose. */
+
 "use client";
 
 import Link from "next/link";
@@ -8,13 +8,13 @@ import { Menu, X, Search, Loader2, Home, Trophy, Medal, User } from "lucide-reac
 import { tierStyle, cleanTier, GAMEMODES, gamemodeIcon } from "./tiers";
 import { formatNumber } from "./data";
 
-/* ---------- Brand ---------- */
+
 
 export function Logo({ size = "md" }: { size?: "sm" | "md" }) {
   const s = size === "sm" ? "h-8 w-8" : "h-10 w-10";
   return (
     <Link href="/" className="group flex shrink-0 items-center gap-2.5">
-      {/* Main AsianTiers logo — voxel Earth cube */}
+      {}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/logo.png"
@@ -31,7 +31,7 @@ export function Logo({ size = "md" }: { size?: "sm" | "md" }) {
   );
 }
 
-/* ---------- Gamemode icon (local SVG assets) ---------- */
+
 
 export function ModeIcon({ id, size = 24, className = "" }: { id: string; size?: number; className?: string }) {
   return (
@@ -49,11 +49,10 @@ export function ModeIcon({ id, size = 24, className = "" }: { id: string; size?:
   );
 }
 
-/* ---------- Global player search (navbar) ---------- */
+
 
 type MiniPlayer = { ign: string; points: number; tier: string | null };
 
-// Normalise whatever /api/data returns so a missing field can never crash the navbar.
 function toMiniPlayers(rows: unknown): MiniPlayer[] {
   if (!Array.isArray(rows)) return [];
   return rows
@@ -82,7 +81,7 @@ function GlobalSearch({ compact = false }: { compact?: boolean }) {
       const json = await res.json();
       if (res.ok) setPlayers(toMiniPlayers(json.players));
     } catch {
-      /* leave empty — search still submits to /ranking */
+      
     } finally {
       setBusy(false);
     }
@@ -108,8 +107,6 @@ function GlobalSearch({ compact = false }: { compact?: boolean }) {
   const go = (path: string) => {
     setOpen(false);
     setQuery("");
-    // Close the dropdown first, then navigate on the next tick so the click is not
-    // swallowed by the re-render that removes the suggestion list.
     setTimeout(() => {
       if (path.startsWith("/player/")) router.push(path);
       else window.location.assign(path);
@@ -207,7 +204,7 @@ function GlobalSearch({ compact = false }: { compact?: boolean }) {
   );
 }
 
-/* ---------- Nav bar ---------- */
+
 
 const LINKS = [
   { href: "/", label: "Home", icon: Home },
@@ -233,7 +230,7 @@ export function Nav() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 border-b bg-white/90 backdrop-blur-md transition-all duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 border-b bg-navy-950/90 backdrop-blur-md transition-all duration-300 ${
         scrolled ? "border-slate-200 shadow-sm" : "border-slate-100"
       }`}
     >
@@ -301,7 +298,7 @@ export function Nav() {
   );
 }
 
-/* ---------- Gamemode bar ---------- */
+
 
 export function GamemodeBar({ value, onChange }: { value: string; onChange: (id: string) => void }) {
   const tabs = [{ id: "overall", name: "Overall" }, ...GAMEMODES.map((g) => ({ id: g.id, name: g.name }))];
@@ -336,7 +333,7 @@ export function GamemodeBar({ value, onChange }: { value: string; onChange: (id:
   );
 }
 
-/* ---------- Tier badge ---------- */
+
 
 export function TierBadge({ tier, peak, size = "md" }: { tier?: string | null; peak?: string | null; size?: "xs" | "sm" | "md" | "lg" }) {
   const s = tierStyle(tier);
@@ -364,12 +361,9 @@ export function TierBadge({ tier, peak, size = "md" }: { tier?: string | null; p
   );
 }
 
-/* ---------- Minecraft head / skin ---------- */
 
-/**
- * Image sources, tried in order. Each one falls through to the next on error and
- * finally to the real Steve skin, so a broken image is never shown.
- */
+
+
 function skinSources(ign: string, size: number, shape: "head" | "body"): string[] {
   const px = Math.max(size * 2, 96);
   const name = encodeURIComponent(ign.trim());
@@ -394,9 +388,9 @@ export function Head({
   ign: string;
   size?: number;
   className?: string;
-  /** "square" renders a perfect, unrounded square face. */
+  
   shape?: "head" | "body" | "square";
-  /** Ring/outline classes — applied with box-sizing so the square stays exact. */
+  
   ringClassName?: string;
 }) {
   const valid = typeof ign === "string" && /^[A-Za-z0-9_]{1,16}$/.test(ign.trim());
@@ -409,7 +403,6 @@ export function Head({
   const style: React.CSSProperties = { width: size, height: size, minWidth: size, minHeight: size, maxWidth: size, maxHeight: size, boxSizing: "border-box" };
 
   if (index >= all.length) {
-    // Every remote source failed — show initials rather than a broken image.
     return (
       <span className={`grid place-items-center ${radius} bg-navy-700 font-display font-bold text-mint-300 ${ringClassName} ${className}`} style={{ ...style, fontSize: size * 0.42 }} aria-hidden>
         {(ign || "?").slice(0, 1).toUpperCase()}
@@ -445,7 +438,7 @@ export function DiscordMark({ className = "" }: { className?: string }) {
   );
 }
 
-/* ---------- Misc ---------- */
+
 
 export function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint?: string }) {
   return (
@@ -486,7 +479,7 @@ export function Spinner({ label = "Loading" }: { label?: string }) {
   );
 }
 
-/* Logout button used by the admin dashboard */
+
 export function LogoutButton() {
   const router = useRouter();
   const [busy, setBusy] = useState(false);

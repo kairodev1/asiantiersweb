@@ -17,8 +17,8 @@ body {
 }
 
 ::selection {
-  background: #ef4444;
-  color: #ffffff;
+  background: #38bdf8;
+  color: #050505;
 }
 
 ::-webkit-scrollbar {
@@ -120,7 +120,7 @@ body {
   position: absolute;
   inset: 0 auto 0 0;
   width: 25%;
-  background: #ef4444;
+  background: #38bdf8;
   animation: loadingBar 1.1s ease-in-out infinite;
 }
 

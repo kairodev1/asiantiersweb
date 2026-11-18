@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE, SESSION_TTL_SECONDS, createSessionToken, isValidToken, verifyPassword } from "./session";
 
-// Server-only wrapper around the edge-safe session helpers (cookie handling via next/headers).
 
 export { ADMIN_COOKIE, verifyPassword };
 

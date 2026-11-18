@@ -5,7 +5,6 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Deep charcoal / black surfaces
         navy: {
           950: "#050505",
           900: "#0b0b0d",
@@ -14,21 +13,18 @@ const config: Config = {
           700: "#222228",
           600: "#3a3a42",
         },
-        // Red primary accent
         brand: {
-          300: "#fca5a5",
-          400: "#f87171",
-          500: "#ef4444",
-          600: "#dc2626",
+          300: "#86efac",
+          400: "#4ade80",
+          500: "#22c55e",
+          600: "#16a34a",
         },
-        // Darker red secondary accent
         mint: {
-          300: "#fca5a5",
-          400: "#ef4444",
-          500: "#dc2626",
-          600: "#b91c1c",
+          300: "#7dd3fc",
+          400: "#38bdf8",
+          500: "#0ea5e9",
+          600: "#0284c7",
         },
-        // Light text scale for dark theme
         ink: {
           100: "#fafafa",
           200: "#e5e5e5",
@@ -36,7 +32,6 @@ const config: Config = {
           400: "#a3a3a3",
           500: "#737373",
         },
-        // Dark borders/surfaces used throughout
         slate: {
           100: "#1f1f23",
           200: "#262626",

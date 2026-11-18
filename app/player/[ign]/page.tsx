@@ -49,7 +49,6 @@ export default async function PlayerPage({ params }: { params: Promise<{ ign: st
   const bestMode = ranked.filter((m) => m.tier).sort((a, b) => tierRank(b.tier) - tierRank(a.tier))[0] ?? null;
   const bestPeak = ranked.map((m) => m.peak).filter(Boolean).sort((a, b) => tierRank(b) - tierRank(a))[0] ?? null;
 
-  // Masked Discord ID — identifies ownership without exposing the full account ID.
   const discordMasked = player.discord_id ? `••••••${String(player.discord_id).slice(-4)}` : null;
 
   return (
@@ -58,7 +57,7 @@ export default async function PlayerPage({ params }: { params: Promise<{ ign: st
         <ArrowLeft className="h-3.5 w-3.5" /> Back to rankings
       </Link>
 
-      {/* Header card */}
+      {}
       <div className="card relative mt-4 overflow-hidden p-6 sm:p-8">
         <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-brand-500/10 blur-3xl" />
         <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center">
@@ -101,7 +100,7 @@ export default async function PlayerPage({ params }: { params: Promise<{ ign: st
         </div>
       </div>
 
-      {/* Quick stats */}
+      {}
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <MiniStat label="Overall tier" value={tier ? <span className="font-mono text-ink-100">{tier}</span> : "—"} />
         <MiniStat label="Overall rank" value={overallRank ? `#${overallRank}` : "—"} />
@@ -109,7 +108,7 @@ export default async function PlayerPage({ params }: { params: Promise<{ ign: st
         <MiniStat label="Gamemodes ranked" value={`${rankedCount}/${GAMEMODES.length}`} />
       </div>
 
-      {/* Gamemode cards */}
+      {}
       <h2 className="section-title mt-10 text-xl sm:text-2xl">Gamemode tiers</h2>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {ranked.map(({ g, tier: t, points: pts }) => {
