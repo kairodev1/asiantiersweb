@@ -146,6 +146,13 @@ export async function POST(req: Request) {
 
     if (target) {
       const id = target.id;
+      // Keep a stable profile: when an existing user changes their IGN, update the
+      // stored IGN on the same record instead of creating a new profile.
+      if (target.discord_id || discordId) {
+        if (String(target.ign).toLowerCase() !== ign.toLowerCase()) {
+          update.ign = ign;
+        }
+      }
       const payload = action === "linked" ? { ...update, discord_id: discordId || null } : { ...update };
       let data: Record<string, unknown> | null = null;
       let error: { code?: string; message: string } | null = null;
