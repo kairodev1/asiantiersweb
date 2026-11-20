@@ -303,28 +303,54 @@ export function Nav() {
 
 export function GamemodeBar({ value, onChange }: { value: string; onChange: (id: string) => void }) {
   const tabs = [{ id: "overall", name: "Overall" }, ...GAMEMODES.map((g) => ({ id: g.id, name: g.name }))];
+
+  const renderTab = (m: { id: string; name: string }) => {
+    const selected = value === m.id;
+    return (
+      <button
+        key={m.id}
+        role="tab"
+        aria-selected={selected}
+        title={m.name}
+        onClick={() => onChange(m.id)}
+        className={`flex items-center overflow-hidden rounded-xl px-3 py-2 transition-all duration-300 ${
+          selected
+            ? "bg-brand-500/20 text-brand-300 ring-1 ring-inset ring-brand-400/50"
+            : "text-ink-300 hover:bg-navy-800 hover:text-ink-100"
+        }`}
+      >
+        <ModeIcon id={m.id} size={28} className={selected ? "opacity-100" : "opacity-80"} />
+        <span
+          className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${
+            selected ? "ml-2 max-w-[120px] opacity-100" : "ml-0 max-w-0 opacity-0"
+          }`}
+        >
+          {m.name}
+        </span>
+      </button>
+    );
+  };
+
   return (
-    <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-navy-900 p-2" role="tablist" aria-label="Gamemodes">
-      <div className="flex min-w-max gap-2">
-        {tabs.map((m) => {
-          const selected = value === m.id;
-          return (
-            <button
-              key={m.id}
-              role="tab"
-              aria-selected={selected}
-              onClick={() => onChange(m.id)}
-              className={`flex items-center gap-3 whitespace-nowrap rounded-xl px-5 py-3 text-base font-semibold transition duration-200 ${
-                selected
-                  ? "bg-navy-700 text-ink-100 ring-1 ring-inset ring-slate-200"
-                  : "text-ink-300 hover:bg-navy-800 hover:text-ink-100"
-              }`}
-            >
-              <ModeIcon id={m.id} size={24} className={selected ? "opacity-100" : "opacity-70"} />
-              <span>{m.name}</span>
-            </button>
-          );
-        })}
+    <div className="rounded-2xl border border-slate-200 bg-navy-900 p-3" role="tablist" aria-label="Gamemodes">
+      {/* Desktop: single horizontal row with expanding selected tab */}
+      <div className="hidden md:flex items-center justify-center gap-2 overflow-x-auto">
+        {tabs.map(renderTab)}
+      </div>
+      {/* Mobile: compact dropdown */}
+      <div className="md:hidden">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full rounded-xl border border-slate-200 bg-navy-950 px-3 py-2.5 text-sm font-semibold text-ink-100 outline-none transition focus:border-brand-400/70 focus:ring-2 focus:ring-brand-400/20"
+          aria-label="Select gamemode"
+        >
+          {tabs.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name}
+            </option>
+          ))}
+        </select>
       </div>
     </div>
   );
@@ -344,12 +370,17 @@ export function TierBadge({ tier, peak, size = "md" }: { tier?: string | null; p
   const label = `Peak: ${displayPeak ?? "-"}`;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLSpanElement>(null);
-  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const [pos, setPos] = useState<{ top: number; left: number; above: boolean } | null>(null);
 
   useEffect(() => {
     if (!open || !ref.current) return;
     const rect = ref.current.getBoundingClientRect();
-    setPos({ top: rect.top + window.scrollY - 8, left: rect.left + rect.width / 2 + window.scrollX });
+    const above = rect.top >= 36;
+    setPos({
+      top: above ? rect.top - 6 : rect.bottom + 6,
+      left: rect.left + rect.width / 2,
+      above,
+    });
   }, [open]);
 
   return (
@@ -369,7 +400,9 @@ export function TierBadge({ tier, peak, size = "md" }: { tier?: string | null; p
       {open && pos && typeof document !== "undefined"
         ? createPortal(
             <span
-              className="pointer-events-none fixed z-[9999] -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md bg-navy-900 px-2 py-1 text-[10px] font-semibold text-ink-100 shadow-lg ring-1 ring-slate-200"
+              className={`pointer-events-none fixed z-[9999] -translate-x-1/2 whitespace-nowrap rounded-md bg-navy-900 px-2 py-1 text-[10px] font-semibold text-ink-100 shadow-lg ring-1 ring-slate-200 ${
+                pos.above ? "-translate-y-full" : ""
+              }`}
               style={{ top: pos.top, left: pos.left }}
             >
               {label}

@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, Users, ShieldCheck, Sparkles, ExternalLink, Swords } from "lucide-react";
+import { ArrowRight, Users, ShieldCheck, ExternalLink, Swords } from "lucide-react";
 import { fetchAllPlayers, fetchHallOfFame, readClient } from "@/lib/supabase";
 import { GAMEMODES, DISCORD_INVITE } from "@/lib/tiers";
-import { bestTier, formatNumber } from "@/lib/data";
+import { bestTier, formatNumber, totalPoints } from "@/lib/data";
 import { Head, DiscordMark } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -30,24 +30,23 @@ export default async function HomePage() {
   }
 
   const rankedCount = players.filter((p) => bestTier(p)).length;
+  const top3 = [...players]
+    .sort((a, b) => totalPoints(b) - totalPoints(a) || a.ign.localeCompare(b.ign))
+    .slice(0, 3);
 
   return (
     <div className="mx-auto w-full max-w-[1200px] px-4 nav-offset sm:px-8 animate-page-in">
-      <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-navy-900/60 px-6 py-16 sm:px-12 sm:py-24">
+      <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-navy-900/60 px-6 py-16 text-center sm:px-12 sm:py-24">
         <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-brand-500/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-mint-500/10 blur-3xl" />
-        <div className="relative max-w-3xl">
-          <span className="eyebrow">
-            <Sparkles className="h-3 w-3" />
-            Official AsianTiers PvP Tierlist
-          </span>
-          <h1 className="mt-6 font-display text-6xl font-extrabold leading-[0.95] tracking-tight text-ink-100 sm:text-7xl md:text-8xl">
+        <div className="relative mx-auto max-w-3xl">
+          <h1 className="font-display text-6xl font-extrabold leading-[0.95] tracking-tight text-ink-100 sm:text-7xl md:text-8xl">
             Asian<span className="text-mint-400">Tiers</span>
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-ink-300 sm:text-lg">
+          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-ink-300 sm:text-lg">
             The premier Minecraft PvP tierlist for Asian players. Verified rankings across thirteen competitive gamemodes.
           </p>
-          <div className="mt-10 flex flex-wrap items-center gap-3">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Link href="/ranking" className="btn-primary h-12 px-6 text-base">
               View rankings
               <ArrowRight className="h-4 w-4" />
@@ -58,7 +57,7 @@ export default async function HomePage() {
               <ExternalLink className="h-3.5 w-3.5 opacity-70" />
             </a>
           </div>
-          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-ink-400">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-ink-400">
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck className="h-3.5 w-3.5 text-mint-400" /> Verified tester results
             </span>
@@ -125,6 +124,45 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {top3.length > 0 && (
+        <section className="mt-12">
+          <div className="mb-5 text-center">
+            <h2 className="font-display text-2xl font-bold text-ink-100 sm:text-3xl">Top 3 Players</h2>
+            <p className="mt-1 text-sm text-ink-400">The highest-ranked competitors on AsianTiers.</p>
+          </div>
+          <div className="grid items-end gap-4 sm:grid-cols-3">
+            {[top3[0], top3[1], top3[2]].filter(Boolean).map((p, i) => {
+              const podium = [1, 2, 3][i];
+              const points = totalPoints(p);
+              const rank = players
+                .slice()
+                .sort((a, b) => totalPoints(b) - totalPoints(a) || a.ign.localeCompare(b.ign))
+                .findIndex((x) => x.ign === p.ign) + 1;
+              const isChamp = podium === 1;
+              const ring =
+                podium === 1 ? "ring-mint-400/60" : podium === 2 ? "ring-slate-300/40" : "ring-brand-400/40";
+              const avatarSize = isChamp ? 80 : 64;
+              return (
+                <Link
+                  key={String(p.id)}
+                  href={`/player/${encodeURIComponent(p.ign)}`}
+                  className={`card group flex flex-col items-center gap-3 p-6 text-center transition hover:-translate-y-1 ${
+                    isChamp ? "sm:order-2 sm:scale-105" : podium === 2 ? "sm:order-1" : "sm:order-3"
+                  }`}
+                >
+                  <span className={`grid h-9 w-9 place-items-center rounded-full font-display text-sm font-bold ${podium === 1 ? "bg-mint-500 text-navy-950" : podium === 2 ? "bg-slate-300 text-navy-950" : "bg-brand-500 text-navy-950"}`}>
+                    {podium}
+                  </span>
+                  <Head ign={p.ign} size={avatarSize} className={`ring-2 ${ring}`} />
+                  <p className="truncate font-display text-lg font-bold text-ink-100 transition group-hover:text-mint-400">{p.ign}</p>
+                  <p className="font-mono text-sm text-ink-400">#{rank} · {formatNumber(points)} pts</p>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <p className="mt-10 flex items-center justify-center gap-2 text-[11px] text-ink-500">
         <Swords className="h-3.5 w-3.5" /> Tiers are earned through verified tests in the AsianTiers Discord.

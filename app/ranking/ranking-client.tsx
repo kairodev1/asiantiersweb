@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Search, Trophy } from "lucide-react";
@@ -119,13 +118,12 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
 
   return (
     <div className="animate-page-in">
-      <div className="border-b border-slate-200 pb-7">
-        <p className="text-[13px] font-bold uppercase tracking-wide text-mint-400">Leaderboard</p>
-        <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-ink-100 sm:text-4xl">Player rankings</h1>
-        <p className="mt-3 text-[15px] text-ink-300">Overall standings and tier placements across every AsianTiers gamemode.</p>
+      <div className="border-b border-slate-200 pb-4">
+        <h1 className="font-display text-2xl font-extrabold tracking-tight text-ink-100 sm:text-3xl">Player rankings</h1>
+        <p className="mt-1 text-sm text-ink-300">Overall standings and tier placements across every AsianTiers gamemode.</p>
       </div>
 
-      <div className="mt-7">
+      <div className="mt-4">
         <GamemodeBar value={mode} onChange={setMode} />
       </div>
 
@@ -153,27 +151,29 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
             <Empty title="No ranked players yet">Rankings appear once testers submit results.</Empty>
           ) : (
             <div className="card overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[1180px] border-collapse text-sm table-fixed">
-                  <thead>
-                    <tr className="border-b border-slate-200 text-left text-xs font-medium text-ink-400">
-                      <th className="w-16 px-3 py-4 text-center font-medium">Rank</th>
-                      <th className="w-52 px-3 py-4 font-medium">Player</th>
-                      {GAMEMODES.map((g) => (
-                        <th key={g.id} className="w-24 px-2 py-4 text-center font-medium" title={g.name}>
-                          <div className="flex flex-col items-center gap-1">
-                            <ModeIcon id={g.id} size={20} />
-                            <span className="text-[10px] text-ink-500">{g.name}</span>
-                          </div>
-                        </th>
-                      ))}
-                      <th className="w-28 px-4 py-4 text-right font-medium">Points</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentPage.map(({ player, rank, points }) => (
-                      <tr
-                        key={String(player.id)}
+              <ul className="divide-y divide-slate-200">
+                {currentPage.map(({ player, rank, points }) => {
+                  const firstModes = GAMEMODES.slice(0, Math.ceil(GAMEMODES.length / 2));
+                  const secondModes = GAMEMODES.slice(Math.ceil(GAMEMODES.length / 2));
+                  const renderCell = (g: (typeof GAMEMODES)[number]) => {
+                    const t = tierFor(player, g.id);
+                    return (
+                      <span
+                        key={g.id}
+                        className="inline-flex items-center gap-1 rounded-md border border-slate-200/60 bg-navy-900/60 px-1.5 py-0.5"
+                      >
+                        <ModeIcon id={g.id} size={12} className={t ? "opacity-100" : "opacity-30"} />
+                        {t ? (
+                          <TierBadge tier={t} peak={peakFor(player, g.id)} size="xs" />
+                        ) : (
+                          <span className="text-[10px] text-ink-500">—</span>
+                        )}
+                      </span>
+                    );
+                  };
+                  return (
+                    <li key={String(player.id)}>
+                      <div
                         onClick={() => openPlayer(player.ign)}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
@@ -183,43 +183,38 @@ export function RankingClient({ initialPlayers, error }: { initialPlayers: Playe
                         }}
                         tabIndex={0}
                         role="link"
-                        className="group cursor-pointer border-t border-slate-200 transition hover:bg-navy-850 focus:bg-navy-850 focus:outline-none"
+                        className="group flex cursor-pointer flex-col gap-2 px-4 py-3 transition hover:bg-navy-850 focus:bg-navy-850 focus:outline-none sm:flex-row sm:items-center"
                       >
-                        <td className="px-3 py-4 text-center align-middle">
-                          <span className={`font-mono text-base font-bold ${rank && rank <= 3 ? "text-mint-400" : "text-ink-400"}`}>
+                        <div className="flex items-center gap-4 sm:w-56 sm:shrink-0">
+                          <span className={`w-10 shrink-0 text-center font-mono text-base font-bold ${rank && rank <= 3 ? "text-mint-400" : "text-ink-400"}`}>
                             {rank ? `#${rank}` : "—"}
                           </span>
-                        </td>
-                        <td className="px-3 py-4 align-middle">
-                          <div className="flex items-center gap-3">
+                          <div className="flex min-w-0 items-center gap-3">
                             <Head ign={player.ign} size={40} className="ring-1 ring-slate-200" />
-                            <span className="truncate text-[15px] font-semibold text-ink-100 transition group-hover:text-brand-300">{player.ign}</span>
+                            <span className="truncate text-[15px] font-semibold text-ink-100 transition group-hover:text-brand-300">
+                              {player.ign}
+                            </span>
                           </div>
-                        </td>
-                        {GAMEMODES.map((g) => {
-                          const t = tierFor(player, g.id);
-                          return (
-                            <td key={g.id} className="px-2 py-4 text-center align-middle">
-                              <div className="flex flex-col items-center gap-1.5">
-                                <ModeIcon id={g.id} size={16} className={t ? "opacity-100" : "opacity-30"} />
-                                {t ? (
-                                  <TierBadge tier={t} peak={peakFor(player, g.id)} size="xs" />
-                                ) : (
-                                  <span className="text-[11px] text-ink-500">—</span>
-                                )}
-                              </div>
-                            </td>
-                          );
-                        })}
-                        <td className="whitespace-nowrap px-4 py-4 text-right align-middle">
+                        </div>
+
+                        <div className="flex flex-1 flex-col gap-2">
+                          <div className="flex flex-wrap items-center justify-start gap-x-3 gap-y-2">
+                            {firstModes.map(renderCell)}
+                          </div>
+                          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+                            {secondModes.map(renderCell)}
+                          </div>
+                        </div>
+
+                        <div className="sm:w-24 sm:shrink-0 sm:text-right">
                           <span className="font-display text-lg font-bold text-ink-100">{formatNumber(points)}</span>
                           <span className="ml-1 text-[11px] text-ink-500">pts</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
 
               {overallRows.length > PAGE_SIZE && (
                 <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3 text-xs text-ink-400">

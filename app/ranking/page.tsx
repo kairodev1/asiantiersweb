@@ -20,7 +20,7 @@ export default async function RankingPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1480px] px-4 nav-offset sm:px-8">
+    <div className="mx-auto w-full max-w-[1600px] px-4 nav-offset sm:px-8">
       <RankingClient initialPlayers={players} error={error} />
     </div>
   );
